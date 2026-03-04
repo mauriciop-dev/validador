@@ -27,12 +27,19 @@ const analysisLimiter = rateLimit({
 
 // Gemini API Key from environment
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSyDYS_P4ntp-7jVMF6cvGBR0PRD1zRD_Et8";
+console.log("Configuración de API Key:", GEMINI_API_KEY ? `Presente (${GEMINI_API_KEY.substring(0, 5)}...)` : "Ausente");
 
 async function startServer() {
   // API Routes
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", message: "Servidor de Notaría Digital activo" });
+  });
+
   app.post("/api/analyze", analysisLimiter, upload.single("file"), async (req: any, res) => {
+    console.log("Recibida solicitud de análisis");
     try {
       if (!req.file) {
+        console.error("No se recibió archivo");
         return res.status(400).json({ error: "No se ha subido ningún archivo." });
       }
 

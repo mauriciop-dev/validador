@@ -15,14 +15,29 @@ export async function analyzeDocument(file: File): Promise<DocumentMetadata> {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
+    const text = await response.text();
     if (response.status === 429) {
       throw new Error("Límite de demo alcanzado (3 archivos cada 24 horas).");
     }
-    throw new Error(errorData.error || "Error al analizar el documento.");
+    
+    try {
+      const errorData = JSON.parse(text);
+      throw new Error(errorData.error || "Error al analizar el documento.");
+    } catch (e) {
+      if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+        throw new Error('El servidor devolvió una página de error HTML. Es posible que el backend no esté funcionando correctamente.');
+      }
+      throw new Error(`Error del servidor (${response.status}): ${text.substring(0, 100)}`);
+    }
   }
 
-  return await response.json() as DocumentMetadata;
+  const text = await response.text();
+  try {
+    return JSON.parse(text) as DocumentMetadata;
+  } catch (e) {
+    console.error('Error al parsear respuesta:', text);
+    throw new Error('La respuesta del servidor no es un JSON válido.');
+  }
 }
 
 export async function hashFile(file: File): Promise<string> {

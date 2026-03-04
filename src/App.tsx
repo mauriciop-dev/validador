@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Shield, Lock, Network, FunctionSquare as Function, ArrowRight, Github, Twitter, Linkedin, ExternalLink, Globe, Zap, Search, MessageSquare } from 'lucide-react';
+import { Shield, Lock, Network, SquareFunction as Function, ArrowRight, Github, Twitter, Linkedin, ExternalLink, Globe, Zap, Search, MessageSquare } from 'lucide-react';
 import IssuerCenter from './components/IssuerCenter';
 import PublicValidator from './components/PublicValidator';
 import BetaForm from './components/BetaForm';

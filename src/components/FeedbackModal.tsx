@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, MessageSquare, Send, CheckCircle2, Loader2 } from 'lucide-react';
+import { X, MessageSquare, Send, CircleCheckBig as CheckCircle2, Loader2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 interface FeedbackModalProps {

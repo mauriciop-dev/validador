@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Loader2, Send, CheckCircle } from 'lucide-react';
+import { Loader2, Send, CircleCheck as CheckCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function BetaForm() {

@@ -1,6 +1,19 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+let aiInstance: GoogleGenAI | null = null;
+
+function getAI() {
+  if (!aiInstance) {
+    // Try Vite's import.meta.env first, then fallback to process.env (replaced by Vite define)
+    const apiKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : '');
+    
+    if (!apiKey) {
+      console.warn("GEMINI_API_KEY is not defined. AI features will not work.");
+    }
+    aiInstance = new GoogleGenAI({ apiKey: apiKey || "dummy-key" });
+  }
+  return aiInstance;
+}
 
 export interface DocumentMetadata {
   issuer: string;
@@ -11,6 +24,7 @@ export interface DocumentMetadata {
 
 export async function analyzeDocument(file: File): Promise<DocumentMetadata> {
   const base64Data = await fileToBase64(file);
+  const ai = getAI();
   
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",

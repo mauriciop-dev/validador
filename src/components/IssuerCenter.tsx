@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Upload, Shield, CheckCircle, Loader2, Cpu, FileText, Zap, File as FileIcon } from 'lucide-react';
+import { Upload, Shield, CircleCheck as CheckCircle, Loader2, Cpu, FileText, Zap, File as FileIcon } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../lib/supabase';
 import { hashFile, analyzeDocument, DocumentMetadata } from '../services/documentService';

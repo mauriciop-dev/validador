@@ -15,7 +15,7 @@ export const translations = {
       truth: 'Truth.',
       description: 'Eliminate professional fraud with cryptographic certainty. Secure labor certifications and digital assets on an immutable global ledger.',
       demoBtn: 'Try Live Demo',
-      docsBtn: 'Technical Docs',
+      docsBtn: 'Leave Feedback',
       stats: {
         assets: 'VERIFIED ASSETS',
         nodes: 'NODES ACTIVE',
@@ -71,6 +71,20 @@ export const translations = {
       priorityMsg: "You've been added to the priority list.",
       errorMsg: 'Something went wrong. Please try again.',
       limited: 'Limited spots available for Q2 2024',
+    },
+    feedback: {
+      title: 'Share your feedback',
+      desc: 'Your opinion helps us build a better ProDig. What do you think of the platform?',
+      placeholder: 'Write your comments here...',
+      suggestions: ['I liked it', 'I didn\'t like it', 'Subscribe me'],
+      submit: 'Send Feedback',
+      success: 'Thank you for your feedback!',
+    },
+    rateLimit: {
+      title: 'Daily Limit Reached',
+      desc: 'You have reached the limit of 3 free certifications per 24 hours. Join our waitlist to get a professional account with unlimited issuance.',
+      btn: 'Join Waitlist',
+      close: 'Maybe later',
     },
     footer: {
       desc: 'Building the infrastructure for a more transparent and verifiable future. Decentralized trust for the modern workforce.',
@@ -134,7 +148,7 @@ export const translations = {
       truth: 'Verdad.',
       description: 'Elimine el fraude profesional con certeza criptográfica. Asegure certificaciones laborales y activos digitales en un libro de contabilidad global inmutable.',
       demoBtn: 'Probar Demo en Vivo',
-      docsBtn: 'Documentación Técnica',
+      docsBtn: 'Déjanos tus comentarios',
       stats: {
         assets: 'ACTIVOS VERIFICADOS',
         nodes: 'NODOS ACTIVOS',
@@ -190,6 +204,20 @@ export const translations = {
       priorityMsg: 'Ha sido añadido a la lista de prioridad.',
       errorMsg: 'Algo salió mal. Por favor, inténtelo de nuevo.',
       limited: 'Cupos limitados disponibles para el Q2 2024',
+    },
+    feedback: {
+      title: 'Comparte tu opinión',
+      desc: 'Tu opinión nos ayuda a construir un mejor ProDig. ¿Qué te parece la plataforma?',
+      placeholder: 'Escribe tus comentarios aquí...',
+      suggestions: ['Me gustó', 'No me gustó', 'Suscribirme'],
+      submit: 'Enviar Comentarios',
+      success: '¡Gracias por tus comentarios!',
+    },
+    rateLimit: {
+      title: 'Límite Diario Alcanzado',
+      desc: 'Has alcanzado el límite de 3 certificaciones gratuitas cada 24 horas. Únete a nuestra lista de espera para obtener una cuenta profesional con emisiones ilimitadas.',
+      btn: 'Unirse a la Lista de Espera',
+      close: 'Tal vez más tarde',
     },
     footer: {
       desc: 'Construyendo la infraestructura para un futuro más transparente y verificable. Confianza descentralizada para la fuerza laboral moderna.',

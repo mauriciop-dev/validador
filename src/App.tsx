@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Shield, Lock, Network, FunctionSquare as Function, ArrowRight, Github, Twitter, Linkedin, ExternalLink, Globe, Zap, Search } from 'lucide-react';
-import VerificationDemo from './components/VerificationDemo';
+import { Shield, Lock, Network, FunctionSquare as Function, ArrowRight, Github, Twitter, Linkedin, ExternalLink, Globe, Zap, Search, MessageSquare } from 'lucide-react';
 import IssuerCenter from './components/IssuerCenter';
 import PublicValidator from './components/PublicValidator';
 import BetaForm from './components/BetaForm';
+import FeedbackModal from './components/FeedbackModal';
 import { useLanguage } from './context/LanguageContext';
 
 const Navbar = () => {
@@ -73,6 +73,7 @@ const FeatureCard = ({ icon: Icon, title, description }: { icon: any, title: str
 
 export default function App() {
   const { t } = useLanguage();
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   return (
     <div className="min-h-screen grid-bg selection:bg-primary selection:text-white scroll-smooth">
@@ -106,8 +107,11 @@ export default function App() {
                 <a href="#validator" className="px-8 py-4 bg-primary text-white rounded-xl font-bold flex items-center gap-2 hover:scale-105 transition-all shadow-2xl shadow-primary/30">
                   {t('nav.verification')} <ArrowRight className="w-5 h-5" />
                 </a>
-                <button className="px-8 py-4 glass text-white rounded-xl font-bold hover:bg-white/10 transition-colors flex items-center gap-2">
-                  {t('hero.docsBtn')} <ExternalLink className="w-4 h-4 opacity-50" />
+                <button 
+                  onClick={() => setIsFeedbackOpen(true)}
+                  className="px-8 py-4 glass text-white rounded-xl font-bold hover:bg-white/10 transition-colors flex items-center gap-2"
+                >
+                  {t('hero.docsBtn')} <MessageSquare className="w-4 h-4 opacity-50" />
                 </button>
               </div>
 
@@ -170,6 +174,15 @@ export default function App() {
                     </li>
                   ))}
                 </ul>
+
+                <div className="pt-6">
+                  <button 
+                    onClick={() => setIsFeedbackOpen(true)}
+                    className="px-6 py-3 glass text-white rounded-xl font-bold hover:bg-white/10 transition-colors flex items-center gap-2 text-sm"
+                  >
+                    {t('hero.docsBtn')} <MessageSquare className="w-4 h-4 opacity-50" />
+                  </button>
+                </div>
               </div>
               <div>
                 <PublicValidator />
@@ -292,6 +305,11 @@ export default function App() {
       {/* Background Accents */}
       <div className="fixed top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[150px] -z-20 pointer-events-none" />
       <div className="fixed bottom-0 left-0 w-[600px] h-[600px] bg-accent-teal/5 rounded-full blur-[150px] -z-20 pointer-events-none" />
+      
+      <FeedbackModal 
+        isOpen={isFeedbackOpen} 
+        onClose={() => setIsFeedbackOpen(false)} 
+      />
     </div>
   );
 }

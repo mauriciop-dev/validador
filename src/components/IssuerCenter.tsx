@@ -2,19 +2,128 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Upload, Shield, CheckCircle, Loader2, Cpu, FileText, Zap } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { supabase } from '../lib/supabase';
+import RateLimitModal from './RateLimitModal';
 
 export default function IssuerCenter() {
   const { t } = useLanguage();
   const [status, setStatus] = useState<'idle' | 'analyzing' | 'sealing' | 'success'>('idle');
   const [hash, setHash] = useState('');
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [userIp, setUserIp] = useState<string | null>(null);
 
-  const handleIssue = () => {
+  useEffect(() => {
+    // Get user IP on mount
+    fetch('https://api.ipify.org?format=json')
+      .then(res => res.json())
+      .then(data => setUserIp(data.ip))
+      .catch(err => console.error('Error fetching IP:', err));
+  }, []);
+
+  const checkRateLimit = async (): Promise<boolean> => {
+    if (!userIp) return false; // Fail open if IP can't be fetched
+
+    try {
+      if (!supabase) {
+        // Fallback to localStorage if Supabase is not configured
+        const localData = localStorage.getItem(`rate_limit_${userIp}`);
+        const now = Date.now();
+        if (localData) {
+          const { count, lastReset } = JSON.parse(localData);
+          if (now - lastReset < 24 * 60 * 60 * 1000) {
+            if (count >= 3) return true;
+          } else {
+            // Reset if 24h passed
+            localStorage.setItem(`rate_limit_${userIp}`, JSON.stringify({ count: 0, lastReset: now }));
+          }
+        } else {
+          localStorage.setItem(`rate_limit_${userIp}`, JSON.stringify({ count: 0, lastReset: now }));
+        }
+        return false;
+      }
+
+      // Supabase logic
+      const { data, error } = await supabase
+        .from('rate_limits')
+        .select('*')
+        .eq('ip', userIp)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows found"
+        console.error('Supabase rate limit error:', error);
+        return false;
+      }
+
+      const now = new Date().getTime();
+      if (data) {
+        const lastReset = new Date(data.last_reset).getTime();
+        if (now - lastReset < 24 * 60 * 60 * 1000) {
+          if (data.count >= 3) return true;
+        } else {
+          // Reset count in DB
+          await supabase
+            .from('rate_limits')
+            .update({ count: 0, last_reset: new Date().toISOString() })
+            .eq('ip', userIp);
+        }
+      } else {
+        // Create initial record
+        await supabase
+          .from('rate_limits')
+          .insert([{ ip: userIp, count: 0, last_reset: new Date().toISOString() }]);
+      }
+
+      return false;
+    } catch (err) {
+      console.error('Rate limit check failed:', err);
+      return false;
+    }
+  };
+
+  const incrementRateLimit = async () => {
+    if (!userIp) return;
+
+    try {
+      if (!supabase) {
+        const localData = localStorage.getItem(`rate_limit_${userIp}`);
+        if (localData) {
+          const { count, lastReset } = JSON.parse(localData);
+          localStorage.setItem(`rate_limit_${userIp}`, JSON.stringify({ count: count + 1, lastReset }));
+        }
+        return;
+      }
+
+      const { data } = await supabase
+        .from('rate_limits')
+        .select('count')
+        .eq('ip', userIp)
+        .single();
+
+      if (data) {
+        await supabase
+          .from('rate_limits')
+          .update({ count: data.count + 1 })
+          .eq('ip', userIp);
+      }
+    } catch (err) {
+      console.error('Failed to increment rate limit:', err);
+    }
+  };
+
+  const handleIssue = async () => {
+    const limited = await checkRateLimit();
+    if (limited) {
+      setIsRateLimited(true);
+      return;
+    }
+
     setStatus('analyzing');
     setTimeout(() => {
       setStatus('sealing');
-      setTimeout(() => {
+      setTimeout(async () => {
         setHash('0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(''));
         setStatus('success');
+        await incrementRateLimit();
       }, 3000);
     }, 2000);
   };
@@ -133,6 +242,11 @@ export default function IssuerCenter() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <RateLimitModal 
+        isOpen={isRateLimited} 
+        onClose={() => setIsRateLimited(false)} 
+      />
     </div>
   );
 }

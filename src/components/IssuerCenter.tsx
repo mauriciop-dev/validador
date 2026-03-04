@@ -152,16 +152,19 @@ export default function IssuerCenter() {
         
         if (error) {
           console.error('Supabase save error:', error);
-          // If table doesn't exist, we still show success for demo
         }
       }
 
       setStatus('success');
       await incrementRateLimit();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Processing failed:', error);
       setStatus('idle');
-      alert('Error processing document. Please try again.');
+      if (error.message === 'API_KEY_MISSING') {
+        alert('Error: No se ha configurado la API Key de Gemini. Por favor, selecciónala en el panel inferior.');
+      } else {
+        alert('Error processing document. Please try again.');
+      }
     }
   };
 

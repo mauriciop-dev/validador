@@ -15,11 +15,19 @@ export default function ApiKeySelector() {
 
   useEffect(() => {
     const checkKey = async () => {
+      // Check if we already have a key in the environment
+      const envKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || 
+                    (import.meta.env.VITE_API_KEY as string);
+      
+      if (envKey && envKey !== "undefined" && envKey !== "missing-key") {
+        setHasKey(true);
+        return;
+      }
+
       if (window.aistudio) {
         const selected = await window.aistudio.hasSelectedApiKey();
         setHasKey(selected);
       } else {
-        // Not in AI Studio environment or not supported
         setHasKey(true); 
       }
     };

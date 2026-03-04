@@ -1,23 +1,18 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-let aiInstance: GoogleGenAI | null = null;
-
-function getAI() {
-  if (!aiInstance) {
-    // We use VITE_GEMINI_API_KEY which is defined in vite.config.ts
-    // It falls back to GEMINI_API_KEY or API_KEY from the environment
-    let apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
-    
-    if (!apiKey || apiKey === "undefined") {
-      console.error("CRITICAL: GEMINI_API_KEY is not defined. AI features will fail.");
-      // We still initialize to avoid crashing the whole app, but calls will fail
-      aiInstance = new GoogleGenAI({ apiKey: "missing-key" });
-    } else {
-      aiInstance = new GoogleGenAI({ apiKey });
-    }
+// Helper to get the most up-to-date API key
+const getApiKey = () => {
+  // Try multiple sources for the API key
+  const key = (import.meta.env.VITE_GEMINI_API_KEY as string) || 
+              (import.meta.env.VITE_API_KEY as string) ||
+              "";
+  
+  // Basic validation to avoid using placeholder strings
+  if (!key || key === "undefined" || key === "missing-key") {
+    return null;
   }
-  return aiInstance;
-}
+  return key;
+};
 
 export interface DocumentMetadata {
   issuer: string;
@@ -27,8 +22,14 @@ export interface DocumentMetadata {
 }
 
 export async function analyzeDocument(file: File): Promise<DocumentMetadata> {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    console.error("CRITICAL: GEMINI_API_KEY is not defined. AI features will fail.");
+    throw new Error("API_KEY_MISSING");
+  }
+
   const base64Data = await fileToBase64(file);
-  const ai = getAI();
+  const ai = new GoogleGenAI({ apiKey });
   
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",

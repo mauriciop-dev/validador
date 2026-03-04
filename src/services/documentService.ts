@@ -2,13 +2,25 @@ import { GoogleGenAI, Type } from "@google/genai";
 
 // Helper to get the most up-to-date API key
 const getApiKey = () => {
-  // Try multiple sources for the API key
-  const key = (import.meta.env.VITE_GEMINI_API_KEY as string) || 
-              (import.meta.env.VITE_API_KEY as string) ||
-              "";
+  // Try to get it from global process if injected at runtime
+  const globalKey = (globalThis as any).process?.env?.API_KEY || 
+                    (globalThis as any).process?.env?.GEMINI_API_KEY;
   
-  // Basic validation to avoid using placeholder strings
-  if (!key || key === "undefined" || key === "missing-key") {
+  // Try Vite's build-time variables
+  const viteKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || 
+                  (import.meta.env.VITE_API_KEY as string);
+  
+  const key = globalKey || viteKey || "";
+  
+  // Debug log (masked)
+  if (key) {
+    console.log(`API Key detected (starts with: ${key.substring(0, 4)}...)`);
+  } else {
+    console.warn("No API Key detected in any source.");
+  }
+  
+  // Basic validation
+  if (!key || key === "undefined" || key === "missing-key" || key.length < 10) {
     return null;
   }
   return key;

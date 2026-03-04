@@ -45,35 +45,29 @@ export default function ApiKeySelector() {
   if (hasKey === true || hasKey === null) return null;
 
   return (
-    <div className="fixed bottom-6 left-6 z-[100] max-w-sm">
-      <div className="glass border border-amber-500/50 p-6 rounded-2xl shadow-2xl bg-amber-950/20 backdrop-blur-xl">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center text-amber-500 shrink-0">
-            <AlertCircle className="w-6 h-6" />
-          </div>
-          <div className="space-y-3">
-            <h4 className="text-white font-bold text-sm">Configuración de IA Requerida</h4>
-            <p className="text-slate-400 text-xs leading-relaxed">
-              Para utilizar las funciones de análisis de documentos, debes seleccionar una API Key válida.
-            </p>
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={handleOpenSelector}
-                className="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg text-xs transition-all flex items-center justify-center gap-2"
-              >
-                <Key className="w-4 h-4" /> Seleccionar API Key
-              </button>
-              <a 
-                href="https://ai.google.dev/gemini-api/docs/billing" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-[10px] text-slate-500 hover:text-white flex items-center justify-center gap-1 transition-colors"
-              >
-                Documentación de Facturación <ExternalLink className="w-3 h-3" />
-              </a>
-            </div>
-          </div>
-        </div>
+    <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-500 text-black px-4 py-3 shadow-lg flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <AlertCircle className="w-5 h-5" />
+        <p className="font-medium text-sm">
+          <span className="font-bold">Acción requerida:</span> Para usar las funciones de IA (Notaría), debes configurar una API Key de Gemini.
+        </p>
+      </div>
+      <div className="flex items-center gap-4">
+        <a 
+          href="https://ai.google.dev/gemini-api/docs/billing" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-xs underline hover:text-black/80 flex items-center gap-1"
+        >
+          Facturación <ExternalLink className="w-3 h-3" />
+        </a>
+        <button
+          onClick={handleOpenSelector}
+          className="bg-black text-white px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-black/80 transition-colors flex items-center gap-2"
+        >
+          <Key className="w-4 h-4" />
+          Configurar API Key
+        </button>
       </div>
     </div>
   );

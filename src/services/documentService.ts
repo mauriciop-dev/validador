@@ -2,22 +2,21 @@ import { GoogleGenAI, Type } from "@google/genai";
 
 // Helper to get the most up-to-date API key
 const getApiKey = () => {
-  // Try to get it from global process if injected at runtime
+  // 1. Check for manual key in localStorage (highest priority for user override)
+  const manualKey = localStorage.getItem('PRODIG_MANUAL_KEY');
+  if (manualKey && manualKey.length > 10) {
+    return manualKey;
+  }
+
+  // 2. Try to get it from global process if injected at runtime
   const globalKey = (globalThis as any).process?.env?.API_KEY || 
                     (globalThis as any).process?.env?.GEMINI_API_KEY;
   
-  // Try Vite's build-time variables
+  // 3. Try Vite's build-time variables
   const viteKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || 
                   (import.meta.env.VITE_API_KEY as string);
   
   const key = globalKey || viteKey || "";
-  
-  // Debug log (masked)
-  if (key) {
-    console.log(`API Key detected (starts with: ${key.substring(0, 4)}...)`);
-  } else {
-    console.warn("No API Key detected in any source.");
-  }
   
   // Basic validation
   if (!key || key === "undefined" || key === "missing-key" || key.length < 10) {

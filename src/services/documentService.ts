@@ -1,30 +1,3 @@
-import { GoogleGenAI, Type } from "@google/genai";
-
-// Helper to get the most up-to-date API key
-const getApiKey = () => {
-  // 1. Check for manual key in localStorage (highest priority for user override)
-  const manualKey = localStorage.getItem('PRODIG_MANUAL_KEY');
-  if (manualKey && manualKey.length > 10) {
-    return manualKey;
-  }
-
-  // 2. Try to get it from global process if injected at runtime
-  const globalKey = (globalThis as any).process?.env?.API_KEY || 
-                    (globalThis as any).process?.env?.GEMINI_API_KEY;
-  
-  // 3. Try Vite's build-time variables
-  const viteKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || 
-                  (import.meta.env.VITE_API_KEY as string);
-  
-  const key = globalKey || viteKey || "";
-  
-  // Basic validation
-  if (!key || key === "undefined" || key === "missing-key" || key.length < 10) {
-    return null;
-  }
-  return key;
-};
-
 export interface DocumentMetadata {
   issuer: string;
   recipient: string;
@@ -33,67 +6,23 @@ export interface DocumentMetadata {
 }
 
 export async function analyzeDocument(file: File): Promise<DocumentMetadata> {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    console.error("CRITICAL: GEMINI_API_KEY is not defined. AI features will fail.");
-    throw new Error("API_KEY_MISSING");
-  }
+  const formData = new FormData();
+  formData.append('file', file);
 
-  const base64Data = await fileToBase64(file);
-  const ai = new GoogleGenAI({ apiKey });
-  
-  const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: [
-      {
-        parts: [
-          {
-            inlineData: {
-              data: base64Data.split(',')[1],
-              mimeType: file.type || "application/pdf",
-            },
-          },
-          {
-            text: "Analyze this professional certification and extract the following information in JSON format: issuer (the company or institution), recipient (the person receiving the certificate), role (the job title or course name), and date (the date of issuance). If any field is missing, use 'Unknown'.",
-          },
-        ],
-      },
-    ],
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          issuer: { type: Type.STRING },
-          recipient: { type: Type.STRING },
-          role: { type: Type.STRING },
-          date: { type: Type.STRING },
-        },
-        required: ["issuer", "recipient", "role", "date"],
-      },
-    },
+  const response = await fetch('/api/analyze', {
+    method: 'POST',
+    body: formData,
   });
 
-  try {
-    return JSON.parse(response.text || "{}") as DocumentMetadata;
-  } catch (e) {
-    console.error("Failed to parse Gemini response:", e);
-    return {
-      issuer: "Unknown",
-      recipient: "Unknown",
-      role: "Unknown",
-      date: "Unknown",
-    };
+  if (!response.ok) {
+    const errorData = await response.json();
+    if (response.status === 429) {
+      throw new Error("Límite de demo alcanzado (3 archivos cada 24 horas).");
+    }
+    throw new Error(errorData.error || "Error al analizar el documento.");
   }
-}
 
-async function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
-  });
+  return await response.json() as DocumentMetadata;
 }
 
 export async function hashFile(file: File): Promise<string> {

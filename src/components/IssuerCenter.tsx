@@ -127,7 +127,7 @@ export default function IssuerCenter() {
     setStatus('analyzing');
 
     try {
-      // 1. Analyze with AI
+      // 1. Analyze with AI (now calls backend)
       const aiMetadata = await analyzeDocument(file);
       setMetadata(aiMetadata);
       
@@ -160,10 +160,12 @@ export default function IssuerCenter() {
     } catch (error: any) {
       console.error('Processing failed:', error);
       setStatus('idle');
-      if (error.message === 'API_KEY_MISSING') {
-        alert('Error: No se ha configurado la API Key de Gemini. Por favor, selecciónala en el panel inferior.');
+      
+      // Handle specific error messages from backend
+      if (error.message.includes('Límite de demo')) {
+        setIsRateLimited(true);
       } else {
-        alert('Error processing document. Please try again.');
+        alert(error.message || 'Error al procesar el documento. Por favor, intente de nuevo.');
       }
     }
   };

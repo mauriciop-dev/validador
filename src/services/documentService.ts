@@ -10,6 +10,10 @@ export interface DocumentMetadata {
 }
 
 export async function notarizeDocument(metadata: DocumentMetadata, hash: string, fileName?: string) {
+  if (!supabase) {
+    console.warn('Supabase not configured. Document not saved to database.');
+    return null;
+  }
   const { data, error } = await supabase
     .from('certificates')
     .insert([
@@ -34,6 +38,10 @@ export async function notarizeDocument(metadata: DocumentMetadata, hash: string,
 }
 
 export async function verifyDocument(hash: string): Promise<DocumentMetadata | null> {
+  if (!supabase) {
+    console.warn('Supabase not configured. Verification skipped.');
+    return null;
+  }
   const { data, error } = await supabase
     .from('certificates')
     .select('*')

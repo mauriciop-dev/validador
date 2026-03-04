@@ -6,9 +6,10 @@ export interface DocumentMetadata {
   role: string;
   date: string;
   hash?: string;
+  fileName?: string;
 }
 
-export async function notarizeDocument(metadata: DocumentMetadata, hash: string) {
+export async function notarizeDocument(metadata: DocumentMetadata, hash: string, fileName?: string) {
   const { data, error } = await supabase
     .from('certificates')
     .insert([
@@ -17,7 +18,8 @@ export async function notarizeDocument(metadata: DocumentMetadata, hash: string)
         issuer: metadata.issuer, 
         recipient: metadata.recipient, 
         role: metadata.role, 
-        date: metadata.date 
+        date: metadata.date,
+        file_name: fileName
       }
     ])
     .select();

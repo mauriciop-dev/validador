@@ -138,7 +138,7 @@ export default function IssuerCenter() {
       setHash(fileHash);
 
       // 3. Save to Supabase
-      await notarizeDocument(aiMetadata, fileHash);
+      await notarizeDocument(aiMetadata, fileHash, file.name);
 
       setStatus('success');
       await incrementRateLimit();

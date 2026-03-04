@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Loader2, Send, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function BetaForm() {
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
@@ -19,7 +21,7 @@ export default function BetaForm() {
         // Mock success if Supabase is not configured
         await new Promise(resolve => setTimeout(resolve, 1500));
         setStatus('success');
-        setMessage('Thanks for joining! We\'ll be in touch soon.');
+        setMessage(t('cta.successMsg'));
         return;
       }
 
@@ -30,11 +32,11 @@ export default function BetaForm() {
       if (error) throw error;
 
       setStatus('success');
-      setMessage('You\'ve been added to the priority list.');
+      setMessage(t('cta.priorityMsg'));
     } catch (err: any) {
       console.error('Signup error:', err);
       setStatus('error');
-      setMessage(err.message || 'Something went wrong. Please try again.');
+      setMessage(err.message || t('cta.errorMsg'));
     }
   };
 
@@ -49,7 +51,7 @@ export default function BetaForm() {
           <CheckCircle className="w-6 h-6" />
         </div>
         <div>
-          <h4 className="font-bold text-white">Registration Successful</h4>
+          <h4 className="font-bold text-white">{t('cta.success')}</h4>
           <p className="text-sm text-slate-400">{message}</p>
         </div>
       </motion.div>
@@ -64,7 +66,7 @@ export default function BetaForm() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your business email"
+            placeholder={t('cta.placeholder')}
             required
             className="w-full bg-white/5 border border-slate-700 rounded-xl px-5 py-4 focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-white transition-all placeholder:text-slate-600"
           />
@@ -78,7 +80,7 @@ export default function BetaForm() {
             <Loader2 className="w-5 h-5 animate-spin" />
           ) : (
             <>
-              Join Beta
+              {t('cta.btn')}
               <Send className="w-4 h-4" />
             </>
           )}
@@ -88,7 +90,7 @@ export default function BetaForm() {
         <p className="mt-3 text-xs text-red-400 text-center">{message}</p>
       )}
       <p className="mt-6 text-[10px] text-slate-500 text-center uppercase tracking-widest">
-        Limited spots available for Q2 2024
+        {t('cta.limited')}
       </p>
     </form>
   );

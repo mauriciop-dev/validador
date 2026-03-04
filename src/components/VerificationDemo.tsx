@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Upload, Shield, CheckCircle, Loader2, Cpu, Database } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useLanguage } from '../context/LanguageContext';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -11,6 +12,7 @@ function cn(...inputs: ClassValue[]) {
 type Step = 'upload' | 'hashing' | 'validating' | 'success';
 
 export default function VerificationDemo() {
+  const { t } = useLanguage();
   const [step, setStep] = useState<Step>('upload');
   const [progress, setProgress] = useState(0);
   const [hash, setHash] = useState('');
@@ -72,7 +74,7 @@ export default function VerificationDemo() {
             <div className="w-3 h-3 rounded-full bg-emerald-500/50" />
           </div>
           <span className="text-[10px] font-mono text-slate-500 tracking-widest uppercase">
-            VERIFICATION_ENGINE_V1.02
+            {t('demo.engine')}
           </span>
         </div>
 
@@ -81,7 +83,7 @@ export default function VerificationDemo() {
           <div className={cn("transition-opacity duration-500", step !== 'upload' && "opacity-40")}>
             <div className="flex items-start gap-4 mb-4">
               <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">1</span>
-              <h4 className="font-bold text-white">Upload Certification</h4>
+              <h4 className="font-bold text-white">{t('demo.step1')}</h4>
             </div>
             
             {step === 'upload' ? (
@@ -91,8 +93,8 @@ export default function VerificationDemo() {
                 className="border-2 border-dashed border-slate-700 rounded-2xl p-10 flex flex-col items-center justify-center bg-slate-900/50 group cursor-pointer hover:border-primary transition-colors"
               >
                 <Upload className="w-10 h-10 text-slate-400 group-hover:text-primary mb-2 transition-colors" />
-                <p className="text-sm font-medium text-slate-500">Drag Labor Certification PDF here</p>
-                <p className="text-[10px] text-slate-600 mt-2">Supports PDF, PNG, JPG (Max 10MB)</p>
+                <p className="text-sm font-medium text-slate-500">{t('demo.step1Desc')}</p>
+                <p className="text-[10px] text-slate-600 mt-2">{t('demo.step1Sub')}</p>
               </motion.div>
             ) : (
               <div className="border border-slate-800 rounded-2xl p-4 flex items-center gap-3 bg-slate-900/30">
@@ -101,7 +103,7 @@ export default function VerificationDemo() {
                 </div>
                 <div>
                   <p className="text-xs font-medium text-slate-300">certification_v4.pdf</p>
-                  <p className="text-[10px] text-slate-500">2.4 MB • Uploaded</p>
+                  <p className="text-[10px] text-slate-500">2.4 MB • {t('demo.step1Uploaded')}</p>
                 </div>
               </div>
             )}
@@ -111,7 +113,7 @@ export default function VerificationDemo() {
           <div className={cn("transition-opacity duration-500", step === 'upload' && "opacity-20", step !== 'hashing' && step !== 'upload' && "opacity-40")}>
             <div className="flex items-start gap-4 mb-4">
               <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">2</span>
-              <h4 className="font-bold text-white">Cryptographic Hashing</h4>
+              <h4 className="font-bold text-white">{t('demo.step2')}</h4>
             </div>
             
             <div className="glass border-primary/30 rounded-2xl p-6 relative overflow-hidden">
@@ -127,9 +129,9 @@ export default function VerificationDemo() {
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[10px] font-mono text-accent-teal flex items-center gap-2">
                   {step === 'hashing' && <Loader2 className="w-3 h-3 animate-spin" />}
-                  {step === 'hashing' ? 'SHA-256 GENERATION...' : 'HASH GENERATED'}
+                  {step === 'hashing' ? t('demo.step2Status') : t('demo.step2Done')}
                 </span>
-                <span className="text-[10px] font-mono text-slate-500">{progress}% COMPLETE</span>
+                <span className="text-[10px] font-mono text-slate-500">{progress}% {t('demo.step2Complete')}</span>
               </div>
               
               <div className="font-mono text-primary text-sm break-all leading-relaxed">
@@ -142,7 +144,7 @@ export default function VerificationDemo() {
           <div className={cn("transition-opacity duration-500", (step === 'upload' || step === 'hashing') && "opacity-20")}>
             <div className="flex items-start gap-4 mb-4">
               <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">3</span>
-              <h4 className="font-bold text-white">Blockchain Validation</h4>
+              <h4 className="font-bold text-white">{t('demo.step3')}</h4>
             </div>
             
             <button 
@@ -156,17 +158,17 @@ export default function VerificationDemo() {
               {step === 'validating' ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Validating Nodes...
+                  {t('demo.step3Validating')}
                 </>
               ) : step === 'success' ? (
                 <>
                   <CheckCircle className="w-5 h-5" />
-                  Verified on Global Blockchain
+                  {t('demo.step3Verified')}
                 </>
               ) : (
                 <>
                   <Database className="w-5 h-5" />
-                  Awaiting Hash...
+                  {t('demo.step3Awaiting')}
                 </>
               )}
             </button>
@@ -189,23 +191,23 @@ export default function VerificationDemo() {
               >
                 <CheckCircle className="w-10 h-10" />
               </motion.div>
-              <h3 className="text-2xl font-black mb-2 text-white">Verification Complete</h3>
+              <h3 className="text-2xl font-black mb-2 text-white">{t('demo.successTitle')}</h3>
               <p className="text-slate-400 text-sm mb-8 max-w-xs">
-                The document has been successfully validated against the global ledger.
+                {t('demo.successDesc')}
               </p>
               
               <div className="w-full space-y-3 mb-8">
                 <div className="flex justify-between text-[10px] font-mono border-b border-white/10 pb-2">
-                  <span className="text-slate-500">BLOCK NUMBER</span>
+                  <span className="text-slate-500">{t('demo.blockNum')}</span>
                   <span className="text-accent-teal">#18,492,031</span>
                 </div>
                 <div className="flex justify-between text-[10px] font-mono border-b border-white/10 pb-2">
-                  <span className="text-slate-500">TIMESTAMP</span>
+                  <span className="text-slate-500">{t('demo.timestamp')}</span>
                   <span className="text-slate-300">{new Date().toISOString()}</span>
                 </div>
                 <div className="flex justify-between text-[10px] font-mono border-b border-white/10 pb-2">
-                  <span className="text-slate-500">STATUS</span>
-                  <span className="text-emerald-400">FINALIZED</span>
+                  <span className="text-slate-500">{t('demo.status')}</span>
+                  <span className="text-emerald-400">{t('demo.finalized')}</span>
                 </div>
               </div>
 
@@ -213,7 +215,7 @@ export default function VerificationDemo() {
                 onClick={reset}
                 className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-bold transition-colors"
               >
-                Verify Another Document
+                {t('demo.verifyAnother')}
               </button>
             </motion.div>
           )}

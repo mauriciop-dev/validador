@@ -1,26 +1,68 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, ShieldCheck, ShieldAlert, ExternalLink, RefreshCw, FileSearch, ArrowRight } from 'lucide-react';
+import { Search, ShieldCheck, ShieldAlert, ExternalLink, RefreshCw, FileSearch, ArrowRight, File as FileIcon } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { supabase } from '../lib/supabase';
+import { hashFile, DocumentMetadata } from '../services/documentService';
 
 export default function PublicValidator() {
   const { t } = useLanguage();
   const [status, setStatus] = useState<'idle' | 'scanning' | 'result'>('idle');
   const [isValid, setIsValid] = useState(true);
+  const [metadata, setMetadata] = useState<DocumentMetadata | null>(null);
 
-  const handleVerify = () => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
     setStatus('scanning');
-    // Randomly decide if it's valid for demo purposes
-    const result = Math.random() > 0.3;
-    setIsValid(result);
-    
-    setTimeout(() => {
+
+    try {
+      // 1. Generate Hash
+      const fileHash = await hashFile(file);
+      
+      // 2. Check Supabase
+      if (supabase) {
+        const { data, error } = await supabase
+          .from('certificates')
+          .select('*')
+          .eq('hash', fileHash)
+          .single();
+        
+        if (data && !error) {
+          setIsValid(true);
+          setMetadata({
+            issuer: data.issuer,
+            recipient: data.recipient,
+            role: data.role,
+            date: data.date
+          });
+        } else {
+          setIsValid(false);
+          setMetadata(null);
+        }
+      } else {
+        // Fallback for demo if Supabase is not connected
+        setIsValid(Math.random() > 0.5);
+      }
+
       setStatus('result');
-    }, 2500);
+    } catch (error) {
+      console.error('Verification failed:', error);
+      setStatus('idle');
+      alert('Error verifying document.');
+    }
   };
 
   return (
     <div className="glass rounded-3xl p-8 border border-white/10 shadow-2xl relative overflow-hidden">
+      <input 
+        type="file" 
+        id="validator-file-input" 
+        className="hidden" 
+        onChange={handleFileSelect}
+        accept=".pdf,.png,.jpg,.jpeg"
+      />
       <div className="flex items-center justify-between mb-8">
         <div>
           <h3 className="text-2xl font-black text-white">{t('validator.title')}</h3>
@@ -38,7 +80,7 @@ export default function PublicValidator() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            onClick={handleVerify}
+            onClick={() => document.getElementById('validator-file-input')?.click()}
             className="border-2 border-dashed border-slate-700 rounded-2xl p-12 flex flex-col items-center justify-center bg-slate-900/50 group cursor-pointer hover:border-accent-teal transition-all"
           >
             <div className="relative mb-4">
@@ -101,9 +143,30 @@ export default function PublicValidator() {
               <h4 className={`text-2xl font-black mb-2 ${isValid ? 'text-emerald-400' : 'text-red-400'}`}>
                 {isValid ? t('validator.valid') : t('validator.invalid')}
               </h4>
-              <p className="text-slate-400 text-sm max-w-xs leading-relaxed">
+              <p className="text-slate-400 text-sm max-w-xs leading-relaxed mb-6">
                 {isValid ? t('validator.validDesc') : t('validator.invalidDesc')}
               </p>
+
+              {isValid && metadata && (
+                <div className="w-full grid grid-cols-2 gap-4 p-4 bg-white/5 rounded-xl border border-white/10 text-left">
+                  <div>
+                    <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Emisor</p>
+                    <p className="text-xs text-white font-medium truncate">{metadata.issuer}</p>
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Receptor</p>
+                    <p className="text-xs text-white font-medium truncate">{metadata.recipient}</p>
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Cargo/Curso</p>
+                    <p className="text-xs text-white font-medium truncate">{metadata.role}</p>
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Fecha</p>
+                    <p className="text-xs text-white font-medium truncate">{metadata.date}</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {isValid && (

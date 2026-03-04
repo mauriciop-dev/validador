@@ -4,13 +4,17 @@ let aiInstance: GoogleGenAI | null = null;
 
 function getAI() {
   if (!aiInstance) {
-    // Try Vite's import.meta.env first, then fallback to process.env (replaced by Vite define)
-    const apiKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : '');
+    // We use VITE_GEMINI_API_KEY which is defined in vite.config.ts
+    // It falls back to GEMINI_API_KEY or API_KEY from the environment
+    let apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
     
-    if (!apiKey) {
-      console.warn("GEMINI_API_KEY is not defined. AI features will not work.");
+    if (!apiKey || apiKey === "undefined") {
+      console.error("CRITICAL: GEMINI_API_KEY is not defined. AI features will fail.");
+      // We still initialize to avoid crashing the whole app, but calls will fail
+      aiInstance = new GoogleGenAI({ apiKey: "missing-key" });
+    } else {
+      aiInstance = new GoogleGenAI({ apiKey });
     }
-    aiInstance = new GoogleGenAI({ apiKey: apiKey || "dummy-key" });
   }
   return aiInstance;
 }

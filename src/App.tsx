@@ -5,6 +5,7 @@ import IssuerCenter from './components/IssuerCenter';
 import PublicValidator from './components/PublicValidator';
 import BetaForm from './components/BetaForm';
 import FeedbackModal from './components/FeedbackModal';
+import ApiKeySelector from './components/ApiKeySelector';
 import { useLanguage } from './context/LanguageContext';
 
 const Navbar = () => {
@@ -310,6 +311,8 @@ export default function App() {
         isOpen={isFeedbackOpen} 
         onClose={() => setIsFeedbackOpen(false)} 
       />
+      
+      <ApiKeySelector />
     </div>
   );
 }

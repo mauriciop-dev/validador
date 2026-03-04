@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Upload, Shield, CircleCheck as CheckCircle, Loader2, Cpu, FileText, Zap, File as FileIcon } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../lib/supabase';
-import { hashFile, analyzeDocument, DocumentMetadata } from '../services/documentService';
+import { hashFile, analyzeDocument, notarizeDocument, DocumentMetadata } from '../services/documentService';
 import RateLimitModal from './RateLimitModal';
 
 export default function IssuerCenter() {
@@ -127,7 +127,7 @@ export default function IssuerCenter() {
     setStatus('analyzing');
 
     try {
-      // 1. Analyze with AI (now calls backend)
+      // 1. Analyze with AI
       const aiMetadata = await analyzeDocument(file);
       setMetadata(aiMetadata);
       
@@ -137,23 +137,8 @@ export default function IssuerCenter() {
       const fileHash = await hashFile(file);
       setHash(fileHash);
 
-      // 3. Save to Supabase (if available)
-      if (supabase) {
-        const { error } = await supabase
-          .from('certificates')
-          .insert([{
-            hash: fileHash,
-            issuer: aiMetadata.issuer,
-            recipient: aiMetadata.recipient,
-            role: aiMetadata.role,
-            date: aiMetadata.date,
-            file_name: file.name
-          }]);
-        
-        if (error) {
-          console.error('Supabase save error:', error);
-        }
-      }
+      // 3. Save to Supabase
+      await notarizeDocument(aiMetadata, fileHash);
 
       setStatus('success');
       await incrementRateLimit();

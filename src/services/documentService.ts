@@ -1,8 +1,51 @@
+import { supabase } from '../lib/supabase';
+
 export interface DocumentMetadata {
   issuer: string;
   recipient: string;
   role: string;
   date: string;
+  hash?: string;
+}
+
+export async function notarizeDocument(metadata: DocumentMetadata, hash: string) {
+  const { data, error } = await supabase
+    .from('certificates')
+    .insert([
+      { 
+        hash, 
+        issuer: metadata.issuer, 
+        recipient: metadata.recipient, 
+        role: metadata.role, 
+        date: metadata.date 
+      }
+    ])
+    .select();
+
+  if (error) {
+    if (error.code === '23505') { // Unique violation
+      throw new Error('Este documento ya ha sido notarizado previamente.');
+    }
+    throw error;
+  }
+  return data;
+}
+
+export async function verifyDocument(hash: string): Promise<DocumentMetadata | null> {
+  const { data, error } = await supabase
+    .from('certificates')
+    .select('*')
+    .eq('hash', hash)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') { // Not found
+      return null;
+    }
+    throw error;
+  }
+
+  return data as DocumentMetadata;
 }
 
 export async function analyzeDocument(file: File): Promise<DocumentMetadata> {

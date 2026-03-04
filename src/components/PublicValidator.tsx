@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Search, ShieldCheck, ShieldAlert, ExternalLink, RefreshCw, FileSearch, ArrowRight, File as FileIcon } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../lib/supabase';
-import { hashFile, DocumentMetadata } from '../services/documentService';
+import { hashFile, verifyDocument, DocumentMetadata } from '../services/documentService';
 
 export default function PublicValidator() {
   const { t } = useLanguage();
@@ -22,28 +22,14 @@ export default function PublicValidator() {
       const fileHash = await hashFile(file);
       
       // 2. Check Supabase
-      if (supabase) {
-        const { data, error } = await supabase
-          .from('certificates')
-          .select('*')
-          .eq('hash', fileHash)
-          .single();
-        
-        if (data && !error) {
-          setIsValid(true);
-          setMetadata({
-            issuer: data.issuer,
-            recipient: data.recipient,
-            role: data.role,
-            date: data.date
-          });
-        } else {
-          setIsValid(false);
-          setMetadata(null);
-        }
+      const verifiedMetadata = await verifyDocument(fileHash);
+      
+      if (verifiedMetadata) {
+        setIsValid(true);
+        setMetadata(verifiedMetadata);
       } else {
-        // Fallback for demo if Supabase is not connected
-        setIsValid(Math.random() > 0.5);
+        setIsValid(false);
+        setMetadata(null);
       }
 
       setStatus('result');

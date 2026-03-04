@@ -29,18 +29,21 @@ const analysisLimiter = rateLimit({
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSyDYS_P4ntp-7jVMF6cvGBR0PRD1zRD_Et8";
 console.log("Configuración de API Key:", GEMINI_API_KEY ? `Presente (${GEMINI_API_KEY.substring(0, 5)}...)` : "Ausente");
 
+app.use(express.json({ limit: '50mb' }));
+
 async function startServer() {
   // API Routes
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", message: "Servidor de Notaría Digital activo" });
   });
 
-  app.post("/api/analyze", analysisLimiter, upload.single("file"), async (req: any, res) => {
-    console.log("Recibida solicitud de análisis");
+  app.post("/api/analyze", analysisLimiter, async (req, res) => {
+    console.log("Recibida solicitud de análisis JSON");
     try {
-      if (!req.file) {
-        console.error("No se recibió archivo");
-        return res.status(400).json({ error: "No se ha subido ningún archivo." });
+      const { fileData, mimeType } = req.body;
+
+      if (!fileData) {
+        return res.status(400).json({ error: "No se han recibido datos del archivo." });
       }
 
       if (!GEMINI_API_KEY) {
@@ -48,7 +51,6 @@ async function startServer() {
       }
 
       const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-      const base64Data = req.file.buffer.toString("base64");
       
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
@@ -57,8 +59,8 @@ async function startServer() {
             parts: [
               {
                 inlineData: {
-                  data: base64Data,
-                  mimeType: req.file.mimetype || "application/pdf",
+                  data: fileData,
+                  mimeType: mimeType || "application/pdf",
                 },
               },
               {

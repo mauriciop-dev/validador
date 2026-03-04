@@ -6,12 +6,28 @@ export interface DocumentMetadata {
 }
 
 export async function analyzeDocument(file: File): Promise<DocumentMetadata> {
-  const formData = new FormData();
-  formData.append('file', file);
+  // Convert file to base64
+  const reader = new FileReader();
+  const base64Promise = new Promise<string>((resolve, reject) => {
+    reader.onload = () => {
+      const base64String = (reader.result as string).split(',')[1];
+      resolve(base64String);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  const base64Data = await base64Promise;
 
   const response = await fetch('/api/analyze', {
     method: 'POST',
-    body: formData,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      fileData: base64Data,
+      mimeType: file.type || 'application/pdf',
+    }),
   });
 
   if (!response.ok) {

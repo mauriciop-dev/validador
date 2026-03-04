@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Shield, Lock, Network, FunctionSquare as Function, ArrowRight, Github, Twitter, Linkedin, ExternalLink, Globe } from 'lucide-react';
+import { Shield, Lock, Network, FunctionSquare as Function, ArrowRight, Github, Twitter, Linkedin, ExternalLink, Globe, Zap, Search } from 'lucide-react';
 import VerificationDemo from './components/VerificationDemo';
+import IssuerCenter from './components/IssuerCenter';
+import PublicValidator from './components/PublicValidator';
 import BetaForm from './components/BetaForm';
 import { useLanguage } from './context/LanguageContext';
 
@@ -20,17 +22,14 @@ const Navbar = () => {
           </h1>
         </div>
         <nav className="hidden md:flex items-center gap-10">
-          <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors">
-            {t('nav.platform')}
+          <a href="#issuer" className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors">
+            {t('issuer.title')}
           </a>
-          <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors">
-            {t('nav.verification')}
+          <a href="#validator" className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors">
+            {t('validator.title')}
           </a>
-          <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors">
+          <a href="#case-studies" className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors">
             {t('nav.caseStudies')}
-          </a>
-          <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors">
-            {t('nav.enterprise')}
           </a>
         </nav>
         <div className="flex items-center gap-4">
@@ -76,12 +75,12 @@ export default function App() {
   const { t } = useLanguage();
 
   return (
-    <div className="min-h-screen grid-bg selection:bg-primary selection:text-white">
+    <div className="min-h-screen grid-bg selection:bg-primary selection:text-white scroll-smooth">
       <Navbar />
       
       <main>
-        {/* Hero Section */}
-        <section className="relative pt-20 pb-32 overflow-hidden">
+        {/* Hero Section with Issuer Center (Step 1) */}
+        <section id="issuer" className="relative pt-20 pb-32 overflow-hidden">
           <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
@@ -100,13 +99,13 @@ export default function App() {
               </h2>
               
               <p className="text-lg text-slate-400 max-w-xl leading-relaxed font-light">
-                {t('hero.description')}
+                {t('issuer.desc')}
               </p>
               
               <div className="flex flex-wrap gap-4 pt-4">
-                <button className="px-8 py-4 bg-primary text-white rounded-xl font-bold flex items-center gap-2 hover:scale-105 transition-all shadow-2xl shadow-primary/30">
-                  {t('hero.demoBtn')} <ArrowRight className="w-5 h-5" />
-                </button>
+                <a href="#validator" className="px-8 py-4 bg-primary text-white rounded-xl font-bold flex items-center gap-2 hover:scale-105 transition-all shadow-2xl shadow-primary/30">
+                  {t('nav.verification')} <ArrowRight className="w-5 h-5" />
+                </a>
                 <button className="px-8 py-4 glass text-white rounded-xl font-bold hover:bg-white/10 transition-colors flex items-center gap-2">
                   {t('hero.docsBtn')} <ExternalLink className="w-4 h-4 opacity-50" />
                 </button>
@@ -131,8 +130,51 @@ export default function App() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <VerificationDemo />
+              <IssuerCenter />
             </motion.div>
+          </div>
+        </section>
+
+        {/* Public Validator Section (Step 2) */}
+        <section id="validator" className="py-32 bg-slate-950/30 relative">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+              <div className="space-y-8">
+                <div className="w-16 h-16 bg-accent-teal/10 rounded-2xl flex items-center justify-center text-accent-teal">
+                  <Search className="w-8 h-8" />
+                </div>
+                <h2 className="text-4xl lg:text-5xl font-black text-white tracking-tight">
+                  {t('validator.title')}
+                </h2>
+                <p className="text-slate-400 text-lg font-light leading-relaxed">
+                  {t('validator.desc')}
+                </p>
+                <div className="p-6 glass rounded-2xl border border-white/5">
+                  <h4 className="text-white font-bold mb-2">{t('validator.zeroTrustTitle')}</h4>
+                  <p className="text-slate-500 text-sm">
+                    {t('validator.zeroTrustDesc')}
+                  </p>
+                </div>
+                
+                <ul className="space-y-4 pt-4">
+                  {[
+                    t('features.immutability.title'),
+                    t('features.independence.title'),
+                    t('features.math.title')
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-slate-300">
+                      <div className="w-5 h-5 rounded-full bg-accent-teal/20 flex items-center justify-center">
+                        <ArrowRight className="w-3 h-3 text-accent-teal" />
+                      </div>
+                      <span className="text-sm font-medium">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <PublicValidator />
+              </div>
+            </div>
           </div>
         </section>
 
@@ -207,9 +249,14 @@ export default function App() {
             <div>
               <h4 className="text-xs font-black text-white uppercase tracking-widest mb-6">{t('footer.resources')}</h4>
               <ul className="space-y-4">
-                {['Documentation', 'API Reference', 'Status', 'Security'].map(item => (
-                  <li key={item}>
-                    <a href="#" className="text-sm text-slate-500 hover:text-primary transition-colors">{item}</a>
+                {[
+                  { label: t('footerLinks.docs'), href: '#' },
+                  { label: t('footerLinks.api'), href: '#' },
+                  { label: t('footerLinks.status'), href: '#' },
+                  { label: t('footerLinks.security'), href: '#' }
+                ].map(item => (
+                  <li key={item.label}>
+                    <a href={item.href} className="text-sm text-slate-500 hover:text-primary transition-colors">{item.label}</a>
                   </li>
                 ))}
               </ul>

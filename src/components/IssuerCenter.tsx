@@ -26,6 +26,10 @@ export default function IssuerCenter() {
   const checkRateLimit = async (): Promise<boolean> => {
     if (!userIp) return false; // Fail open if IP can't be fetched
 
+    // Excepción para la IP del administrador/usuario solicitado
+    const adminIp = '201.244.165.214';
+    if (userIp === adminIp) return false;
+
     try {
       if (!supabase) {
         // Fallback to localStorage if Supabase is not configured
@@ -85,6 +89,10 @@ export default function IssuerCenter() {
 
   const incrementRateLimit = async () => {
     if (!userIp) return;
+
+    // Excepción para la IP del administrador/usuario solicitado
+    const adminIp = '201.244.165.214';
+    if (userIp === adminIp) return;
 
     try {
       if (!supabase) {

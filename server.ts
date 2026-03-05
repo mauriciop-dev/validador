@@ -23,6 +23,11 @@ const analysisLimiter = rateLimit({
   message: { error: "Límite de demo alcanzado. Solo puedes procesar 3 archivos cada 24 horas." },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => {
+    // Excepción para la IP del administrador/usuario solicitado
+    const adminIp = '201.244.165.214';
+    return req.ip === adminIp || req.headers['x-forwarded-for'] === adminIp;
+  },
 });
 
 // Gemini API Key from environment
